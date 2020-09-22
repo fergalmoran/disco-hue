@@ -4,7 +4,7 @@
 
 Flash your Hue in time to the groove.
 
-### Installation
+### Useage
 
 Create a virtual env and install dependencies
 
