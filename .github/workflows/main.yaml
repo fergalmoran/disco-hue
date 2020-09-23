@@ -2,7 +2,7 @@ name: Package Application with Pyinstaller
 
 on:
   push:
-    branches: ["@release/*"]
+    branches: ["trunk"]
 
 jobs:
   build:
