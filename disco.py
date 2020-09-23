@@ -7,8 +7,8 @@ from audio.errors import noalsaerr
 parser = argparse.ArgumentParser(description='Make your lights dance.')
 parser.add_argument('-b', '--bridge-ip', type=str, dest='bridge_ip', required=True,
                     help='IP or DNS name of your Hue bridge')
-parser.add_argument('-f', '--file', type=str, dest='file', required=True,
-                    help='Audio file to play (omit to user currently playing audio)')
+parser.add_argument('-f', '--file', type=str, dest='file', required=False,
+                    help='Audio file to play, omit to use currently playing audio (a bit wonky at the moment)')
 parser.add_argument('-l', '--light-id', type=int, dest='light_id',
                     help='ID of the light you wish to flash (blank to choose interactively)')
 
@@ -30,6 +30,7 @@ COLOURS = [
     PINK
 ]
 
+
 def get_light_id():
 
     lights = bridge_manager.get_light_list()
@@ -45,7 +46,7 @@ def get_light_id():
 
         if id.isdigit() and int(id) in lights:
             return id
-        
+
         print('Invalid light selected')
 
 
@@ -63,14 +64,15 @@ def flash_light(beat):
     )
     beat += 1
 
+
 if not args.light_id:
     args.light_id = get_light_id()
 
 beat_detector = BeatDetector(flash_light)
 
 print('Starting playback')
-if args.file:
-    with noalsaerr():
-        # beat_detector.play_audio_file(args.file)
+with noalsaerr():
+    if args.file:
+        beat_detector.play_audio_file(args.file)
+    else:
         beat_detector.play_captured()
-
