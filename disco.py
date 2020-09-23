@@ -2,6 +2,7 @@
 import argparse
 from hue.hue_manager import HueManager
 from audio.beat_detector import BeatDetector
+from audio.errors import noalsaerr
 
 parser = argparse.ArgumentParser(description='Make your lights dance.')
 parser.add_argument('-b', '--bridge-ip', type=str, dest='bridge_ip', required=True,
@@ -51,8 +52,6 @@ def get_light_id():
 def flash_light(beat):
     on = (beat % 2) == 0
     colour = COLOURS[beat % len(COLOURS) - 1]
-    print(f"setting {set} with {colour}")
-
     bridge_manager.set_light(
         args.light_id,
         {
@@ -71,5 +70,7 @@ beat_detector = BeatDetector(flash_light)
 
 print('Starting playback')
 if args.file:
-    beat_detector.play_audio_file(args.file)
+    with noalsaerr():
+        # beat_detector.play_audio_file(args.file)
+        beat_detector.play_captured()
 
