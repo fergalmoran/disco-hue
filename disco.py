@@ -67,7 +67,9 @@ def flash_light(beat):
 if not args.light_id:
     args.light_id = get_light_id()
 
-beat_detector = BeatDetector(args.file, flash_light)
+beat_detector = BeatDetector(flash_light)
 
 print('Starting playback')
-beat_detector.start_playing()
+if args.file:
+    beat_detector.play_audio_file(args.file)
+
