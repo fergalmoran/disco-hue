@@ -1,7 +1,7 @@
 from phue import Bridge, PhueRegistrationException
 
 
-class RegistrationException(object):
+class RegistrationException(BaseException):
     pass
 
 
