@@ -18,6 +18,7 @@ try:
     bridge_manager = HueManager(args.bridge_ip)
 except RegistrationException:
     print('Failed to register with Hue Bridge. Press registration button and try again.')
+    exit(1)
 
 ORANGE = (0.6, 0.4)
 RED = (0.67, 0.32)
