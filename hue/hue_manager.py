@@ -1,9 +1,16 @@
-from phue import Bridge
+from phue import Bridge, PhueRegistrationException
+
+
+class RegistrationException(object):
+    pass
 
 
 class HueManager:
     def __init__(self, ip):
-        self._bridge = Bridge(ip)
+        try:
+            self._bridge = Bridge(ip)
+        except PhueRegistrationException:
+            raise RegistrationException
 
     def get_light_list(self):
         lights = self._bridge.get_light_objects('id')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-from hue.hue_manager import HueManager
+from hue.hue_manager import HueManager, RegistrationException
 from audio.beat_detector import BeatDetector
 from audio.errors import noalsaerr
 
@@ -14,8 +14,10 @@ parser.add_argument('-l', '--light-id', type=int, dest='light_id',
 
 
 args = parser.parse_args()
-
-bridge_manager = HueManager(args.bridge_ip)
+try:
+    bridge_manager = HueManager(args.bridge_ip)
+except RegistrationException:
+    print('Failed to register with Hue Bridge. Press registration button and try again.')
 
 ORANGE = (0.6, 0.4)
 RED = (0.67, 0.32)
