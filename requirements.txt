@@ -1,3 +1,8 @@
 phue
+discoverhue
 aubio
 pyaudio
+pyqt5 #needed for theme
+pyqt6
+pyqt6-tools
+pep8

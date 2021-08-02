@@ -1,48 +1,51 @@
 #!/usr/bin/env python
 import argparse
-from hue.hue_manager import HueManager, RegistrationException
-from audio.beat_detector import BeatDetector
-from audio.errors import noalsaerr
+from enum import Enum
+
+from services.disco_ball import DiscoBall
+from services.hue import RegistrationException
+
+
+class Action(Enum):
+    flash = 'flash'
+    listBridges = 'bridges'
+    listLights = 'lights'
+    listInputs = 'inputs'
+
+    def __str__(self):
+        return self.value
+
 
 parser = argparse.ArgumentParser(description='Make your lights dance.')
-parser.add_argument('-b', '--bridge-ip', type=str, dest='bridge_ip', required=True,
+parser.add_argument('-b', '--bridge-ip', type=str, dest='bridge_ip', required=False,
                     help='IP or DNS name of your Hue bridge')
 parser.add_argument('-f', '--file', type=str, dest='file', required=False,
                     help='Audio file to play, omit to use currently playing audio (a bit wonky at the moment)')
 parser.add_argument('-l', '--light-id', type=int, dest='light_id',
                     help='ID of the light you wish to flash (blank to choose interactively)')
-
+parser.add_argument('-a', '--action', type=Action, dest='action', required=False, default=Action.flash,
+                    help='Action to perform')
+parser.add_argument('-s', '--silent', action='store_true', dest='silent', required=False,
+                    help='Suppress non data output')
 
 args = parser.parse_args()
-try:
-    bridge_manager = HueManager(args.bridge_ip)
-except RegistrationException:
-    print('Failed to register with Hue Bridge. Press registration button and try again.')
-    exit(1)
-
-ORANGE = (0.6, 0.4)
-RED = (0.67, 0.32)
-GREEN = (0.15, 0.8)
-PURPLE = (0.25, 0.1)
-PINK = (0.5, 0.25)
-COLOURS = [
-    ORANGE,
-    RED,
-    GREEN,
-    PURPLE,
-    PINK
-]
 
 
-def get_light_id():
+def print_bridge_list(bridges, separator='\t'):
+    for bridge in bridges:
+        print(f"{bridge['id']}{separator}{bridge['value']}", sep='\n')
 
-    lights = bridge_manager.get_light_list()
 
+def print_light_list(lights, separator='\t'):
+    for light in lights:
+        print(f"{light['id']}{separator}{light['value']}", sep='\n')
+
+
+def get_light_id(lights):
     print('\n')
     print('Id - Name')
     print('===========================================')
-    for id, light in lights.items():
-        print(f'{id}  - {light.name}')
+    print_light_list(lights, '  - ')
 
     while True:
         id = input('Please select id of light you wish to flash: ')
@@ -53,29 +56,34 @@ def get_light_id():
         print('Invalid light selected')
 
 
-def flash_light(beat):
-    on = (beat % 2) == 0
-    colour = COLOURS[beat % len(COLOURS) - 1]
-    bridge_manager.set_light(
-        args.light_id,
-        {
-            'transitiontime': 0,
-            'on': on,
-            'xy': colour,
-            'bri': 254
-        }
-    )
-    beat += 1
+if __name__ == '__main__':
+    # First check if we're performing an action that doesn't require a light-id
+    if args.action == Action.listBridges:
+        if not args.silent:
+            print('Looking for bridges, please wait')
+        b = DiscoBall.get_bridge_list()
+        print_bridge_list(b)
+        exit(0)
 
+    try:
+        if not args.bridge_ip:
+            print('Bridge IP not specified')
+            exit(1)
 
-if not args.light_id:
-    args.light_id = get_light_id()
+        manager = DiscoBall(args.bridge_ip)
+        if args.action == Action.listLights:
+            print_light_list(manager.get_light_list())
 
-beat_detector = BeatDetector(flash_light)
+        elif not args.light_id:
+            args.light_id = get_light_id(manager.get_light_list())
 
-print('Starting playback')
-with noalsaerr():
-    if args.file:
-        beat_detector.play_audio_file(args.file)
-    else:
-        beat_detector.play_captured()
+        if args.light_id:
+            manager.play_audio_file(args.light_id, args.file)
+
+    except RegistrationException:
+        print('Failed to register with Hue Bridge. Press registration button and try again.')
+        exit(1)
+
+    except Exception as e:
+        print(f'Error performing action, {e}')
+        exit(1)
