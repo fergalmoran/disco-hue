@@ -13,7 +13,7 @@ class BeatDetector:
         self.win_s = 1024  # fft size
         self.hop_s = self.win_s // 2  # hop size
         self.pyaudio_format = pyaudio.paFloat32
-        self.audio = pyaudio.PyAudio()
+        self._audio = pyaudio.PyAudio()
 
     def __invoke_external_callback(self):
         self.callback(self.beat_number)
@@ -36,7 +36,7 @@ class BeatDetector:
         n_channels = 1
         buffer_size = 512
 
-        stream = self.audio.open(
+        stream = self._audio.open(
             format=self.pyaudio_format,
             channels=n_channels,
             rate=samplerate,
@@ -83,7 +83,7 @@ class BeatDetector:
         )
 
         samplerate = self.a_source.samplerate
-        stream = self.audio.open(
+        self._stream = self._audio.open(
             format=self.pyaudio_format,
             channels=n_channels,
             rate=samplerate,
@@ -92,9 +92,15 @@ class BeatDetector:
             stream_callback=self.__callback_internal
         )
 
-        while stream.is_active():
+        while self._stream.is_active():
             _time.sleep(0.1)
 
-        stream.stop_stream()
-        stream.close()
-        self.audio.terminate()
+        self.stop()
+
+    def stop(self):
+        if self._stream is not None:
+            self._stream.stop_stream()
+            self._stream.close()
+
+        if self._audio is not None:
+            self._audio.terminate()
