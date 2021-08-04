@@ -1,17 +1,14 @@
-import subprocess
 import sys
-import threading
 
 from PyQt6 import uic
 from PyQt6.QtCore import QSettings
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 
 from desktop.discovery import DiscoverBridgesThread, BridgeNotRegisteredException
-from desktop.ui.main_window import Ui_MainWindow
 from services.disco_ball import DiscoBall
 
 
-class App(QMainWindow, Ui_MainWindow):
+class App(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         uic.loadUi('./ui/main.ui', self)
