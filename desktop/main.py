@@ -1,52 +1,65 @@
-import subprocess
 import sys
-import threading
 
 from PyQt6 import uic
+from PyQt6.QtCore import QSettings
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 
-from main_window import Ui_MainWindow
+from desktop.discovery import DiscoverBridgesThread, BridgeNotRegisteredException
 from services.disco_ball import DiscoBall
 
 
-class BridgeNotRegisteredException(Exception):
-    pass
-
-
-class BridgeNotFoundException(Exception):
-    pass
-
-
-class App(QMainWindow, Ui_MainWindow):
+class App(QMainWindow):
     def __init__(self, parent=None):
-        super().__init__()
+        super().__init__(parent)
         uic.loadUi('./ui/main.ui', self)
+        self._settings = QSettings('disco_hue')
         self._manager = None
+        self._selected_light = None
         self._bootstrap_ui()
 
-    def _bootstrap_ui(self):
-        print('Scanning for Hue Bridges')
-        bridges = DiscoBall.get_bridge_list()
-
+    def _bridge_list_finished(self, bridges):
+        self._bridges = bridges
+        self._settings.setValue('discovered_bridges', self._bridges)
+        self.bridgeList.clear()
         if len(bridges) != 0:
-            for bridge in bridges:
+            for bridge in self._bridges:
                 self.bridgeList.addItem(bridge['value'])
             self._select_bridge(0)
 
+    def _populate_bridges(self):
+        previous_bridges = self._settings.value('discovered_bridges')
+        if previous_bridges is not None:
+            self._bridge_list_finished(previous_bridges)
+        else:
+            self.discover_bridges_thread = DiscoverBridgesThread(self._bridge_list_finished)
+            self.discover_bridges_thread.start()
+
+    def _bootstrap_ui(self):
+
+        self._populate_bridges()
         self.bridgeList.currentIndexChanged.connect(self._select_bridge)
+        self.lightsList.currentIndexChanged.connect(self._select_light)
         self.refreshBridges.clicked.connect(lambda: self._select_bridge(self.bridgeList.currentIndex()))
         self.chooseFile.clicked.connect(self._choose_input_file)
         self.startButton.clicked.connect(self._play_audio_file)
+        self.inputFileName.setText(self._settings.value('last_audio_file'))
+
+    def _select_light(self, index):
+        self._selected_light = self._lights[index]
+        self._settings.setValue('selected_light', index)
 
     def _select_bridge(self, index):
-        ip = self.bridgeList.itemText(index)
-        self._manager = DiscoBall(ip)
-        try:
-            lights = self._manager.get_light_list()
-            print(lights)
+        bridge = self._bridges[index]
+        self._settings.setValue('selected_bridge', index)
+        self._manager = DiscoBall(bridge['value'])
 
-            for light in lights:
+        try:
+            self._lights = self._manager.get_light_list()
+            self.lightsList.clear()
+            for light in self._lights:
                 self.lightsList.addItem(light['value'])
+            self._select_light(0)
+
         except BridgeNotRegisteredException as e:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Icon.Warning)
@@ -62,20 +75,12 @@ class App(QMainWindow, Ui_MainWindow):
             '~',
             'Audio Files (*.mp3 *.wav *.ogg)')
         self.inputFileName.setText(fname[0])
+        self._settings.setValue('last_audio_file', fname[0])
 
     def _play_audio_file(self):
-        audio_thread = threading.Thread(target=self._play_audio_file_internal, name="player")
-        audio_thread.start()
-
-    def _play_audio_file_internal(self):
-        command = [
-            '../disco-hue.py',
-            '--action', 'flash',
-            '--file', self.inputFileName.text(),
-            '--light-id', '1',
-            '--bridge-ip', self.bridgeList.currentText()
-        ]
-        subprocess.run(command, stdout=subprocess.PIPE)
+        self._manager.play_audio_file(
+            self._selected_light['id'],
+            self.inputFileName.text())
 
     def closeEvent(self, event):
         if self._manager is not None:

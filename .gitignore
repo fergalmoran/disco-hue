@@ -140,3 +140,4 @@ cython_debug/
 .idea
 .vscode/
 working/
+/desktop/ui/main_window.py

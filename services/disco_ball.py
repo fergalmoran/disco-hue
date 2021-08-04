@@ -59,6 +59,12 @@ class DiscoBall:
     def play_audio_file(self, light_id, file):
         self._light_id = light_id
         print('Starting playback')
+        play_thread = threading.Thread(
+            target=self._play_internal,
+            name="flasher", args=[file])
+        play_thread.start()
+
+    def _play_internal(self, file):
         with noalsaerr():
             if file:
                 self._beat_detector = BeatDetector(self.flash_light)
@@ -69,4 +75,5 @@ class DiscoBall:
                 self._beat_detector.play_captured()
 
     def stop(self):
-        self._beat_detector.stop()
+        if self._beat_detector is not None:
+            self._beat_detector.stop()

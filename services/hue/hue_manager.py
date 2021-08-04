@@ -22,25 +22,16 @@ class HueManager:
                 'id': bridge,
                 'value': urlparse(bridges[bridge]).hostname
             }, bridges))
-
-    def __innermap(self, lights):
+    
+    def get_light_list(self):
         results = []
+        lights = self._bridge.get_light_objects('id')
+        
         for k in lights:
             results.append({
                 'id': lights[k].light_id,
                 'value': lights[k].name
             })
-        return results
-
-    def get_light_list(self):
-        lights = self._bridge.get_light_objects('id')
-        results = self.__innermap(lights)
-        # results = map(lambda i, light: (
-        #     {
-        #         'id': i,
-        #         # 'value': light['name']
-        #     }
-        # ), list(lights.items()))
         return results
 
     def set_light(self, light_id, parameter, value=None, transition_time=None):
