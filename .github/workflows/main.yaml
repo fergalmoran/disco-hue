@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: disco-hue-linux
+          name: disco_hue-linux
           path: dist/linux
 
       - name: Create Release
@@ -43,8 +43,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/linux/disco-hue
-          asset_name: disco-hue-linux
+          asset_path: dist/linux/disco_hue
+          asset_name: disco_hue-linux
           asset_content_type: application/octet-stream
 
       - name: Start SSH via Ngrok

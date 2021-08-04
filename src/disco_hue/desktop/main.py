@@ -1,17 +1,15 @@
-import sys
-
 from PyQt6 import uic
 from PyQt6.QtCore import QSettings
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 
-from desktop.discovery import DiscoverBridgesThread, BridgeNotRegisteredException
-from services.disco_ball import DiscoBall
+from desktop import BridgeNotRegisteredException, DiscoverBridgesThread
+from services import DiscoBall
 
 
 class App(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        uic.loadUi('./ui/main.ui', self)
+        uic.loadUi('./desktop/ui/main.ui', self)
         self._settings = QSettings('disco_hue')
         self._manager = None
         self._selected_light = None
@@ -70,7 +68,7 @@ class App(QMainWindow):
 
     def _choose_input_file(self):
         fname = QFileDialog.getOpenFileName(
-            win,
+            self,
             'Open file',
             '~',
             'Audio Files (*.mp3 *.wav *.ogg)')
@@ -86,16 +84,3 @@ class App(QMainWindow):
         if self._manager is not None:
             self._manager.stop()
         event.accept()
-
-
-app = QApplication(sys.argv)
-win = App()
-
-
-def bootstrap_app():
-    win.show()
-    sys.exit(app.exec())
-
-
-if __name__ == "__main__":
-    bootstrap_app()

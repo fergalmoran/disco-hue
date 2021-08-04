@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
 
-from services.disco_ball import DiscoBall
+from services import DiscoBall
 
 
 class BridgeNotRegisteredException(Exception):

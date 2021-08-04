@@ -140,4 +140,4 @@ cython_debug/
 .idea
 .vscode/
 working/
-/desktop/ui/main_window.py
+/src/disco_hue/desktop/ui/main_window.py

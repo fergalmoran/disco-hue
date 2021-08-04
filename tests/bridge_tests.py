@@ -1,6 +1,6 @@
 import unittest
 
-from services.hue import HueManager
+from src.services.hue import HueManager
 
 """
     Highly dependent on my personal network

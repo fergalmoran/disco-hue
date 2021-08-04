@@ -3,9 +3,9 @@
 """
 import threading
 
-from services.audio.beat_detector import BeatDetector
-from services.audio.errors import noalsaerr
-from services.hue import HueManager
+from .audio import BeatDetector
+from .audio import noalsaerr
+from .hue import HueManager
 
 ORANGE = (0.6, 0.4)
 RED = (0.67, 0.32)

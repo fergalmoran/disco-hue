@@ -12,7 +12,7 @@ Create a virtual env and install dependencies
 $ virtualenv <env>
 $ source <env>/bin/activate
 $ pip install -r requirements.txt
-$ python disco-hue.py --help
+$ python disco_hue.py --help
 ```
 
 ### Usage
@@ -20,7 +20,7 @@ $ python disco-hue.py --help
 Create a virtual env and install dependencies
 
 ```sh
-disco-hue.py [-h] -b BRIDGE_IP [-f FILE] [-l LIGHT_ID]
+disco_hue.py [-h] -b BRIDGE_IP [-f FILE] [-l LIGHT_ID]
 
 optional arguments:
   -b BRIDGE_IP, --bridge-ip BRIDGE_IP
