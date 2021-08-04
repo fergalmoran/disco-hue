@@ -4,12 +4,14 @@ from PyQt6.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 
 from desktop import BridgeNotRegisteredException, DiscoverBridgesThread
 from services import DiscoBall
+from .utils import resource_path
 
 
 class App(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        uic.loadUi('./desktop/ui/main.ui', self)
+
+        uic.loadUi(resource_path('desktop/ui/main.ui'), self)
         self._settings = QSettings('disco_hue')
         self._manager = None
         self._selected_light = None

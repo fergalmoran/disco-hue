@@ -141,3 +141,4 @@ cython_debug/
 .vscode/
 working/
 /src/disco_hue/desktop/ui/main_window.py
+src/disco_hue/desktop/ui/generated/
