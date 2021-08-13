@@ -6,7 +6,7 @@ Flash your Hue in time to the groove.
 
 ### Installation
 
-Create a virtual env and install dependencies
+Create a virtual env and install the dependencies
 
 ```sh
 $ virtualenv <env>
